@@ -1,6 +1,6 @@
 # RayPass
 
-![Logo](./assets/raypass-icon.png)
+<img src="./assets/raypass-icon.png" alt="icon" width="50" height="50" />
 
 Manage passwords through raycast that just your and your laptop know.
 
