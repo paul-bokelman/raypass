@@ -2,7 +2,7 @@ import type { FC } from "react";
 import type { PasswordRecordData } from "../types";
 import type { ValidationErrors } from "../utils";
 import { useState } from "react";
-import { Form, Action, ActionPanel, useNavigation, Icon } from "@raycast/api";
+import { Form, Action, ActionPanel, useNavigation, Icon, showToast, Toast } from "@raycast/api";
 import { documentStore } from "../context";
 import { records, validation } from "../utils";
 import Command from "../raypass";
@@ -35,8 +35,13 @@ export const NewRecordForm: FC = () => {
     const empty = validation.validate.empty<PasswordRecordData>(record, ["name", "password"]);
     if (empty) return;
 
-    await records.create({ record, password: ref?.isEncrypted ? password : undefined });
-    push(<Command />);
+    try {
+      await records.create({ record, password: ref?.isEncrypted ? password : undefined });
+      push(<Command />);
+    } catch (error) {
+      await showToast(Toast.Style.Failure, "Failed to edit record", "Reload and refresh cache if the problem persists");
+      return;
+    }
   };
 
   return (

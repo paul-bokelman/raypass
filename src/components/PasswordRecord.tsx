@@ -1,40 +1,36 @@
 import type { FC } from "react";
 import type { PasswordRecord as PasswordRecordType } from "../types";
-import { Action, ActionPanel, Icon, List, AlertActionStyle, confirmAlert, Image, Color } from "@raycast/api";
-import { records } from "../utils";
-import { documentStore } from "../context";
-import { EditRecordForm } from "../views";
-import { NewRecordAction, ChangeDocumentAction, NewDocumentAction, RefreshLocalReferencesActions } from "../actions";
+import { ActionPanel, Icon, List, Image } from "@raycast/api";
+import {
+  CopyRecordPassword,
+  CopyRecordUsername,
+  CopyRecordEmail,
+  CopyRecordJSON,
+  OpenRecordURL,
+  NewRecordAction,
+  EditRecordAction,
+  DeleteRecordAction,
+  ManageDocumentsAction,
+  NewDocumentAction,
+  RefreshLocalReferencesActions,
+  ShowDocument,
+} from "../actions";
 
 interface Props extends PasswordRecordType {
   revalidateDocument: () => Promise<{
-    location: string;
-    name: string;
+    document: {
+      name: string;
+      location: string;
+    };
     records: Array<PasswordRecordType>;
   } | void>;
 }
 
 export const PasswordRecord: FC<Props> = ({ id, name, url, username, password, email, notes, revalidateDocument }) => {
-  const { ref, password: docPassword } = documentStore.getState();
   const md = `
   ${url ? `## [${name}](${url})` : `## ${name}`}
   ${notes ? notes : ""}
   `;
-
-  const handleDeleteRecord = async () => {
-    if (
-      await confirmAlert({
-        title: `Deleting ${id}`,
-        message: "Are you sure you want to delete this record? This action cannot be undone.",
-        icon: Icon.Trash,
-        primaryAction: { title: "Delete", style: AlertActionStyle.Destructive },
-        dismissAction: { title: "Cancel", style: AlertActionStyle.Cancel },
-      })
-    ) {
-      await records.delete({ id, password: ref?.isEncrypted ? docPassword : undefined });
-      await revalidateDocument();
-    }
-  };
 
   const getIcon = (): Image.Source => {
     if (url) return `https://icon.horse/icon/${new URL(url).hostname}`;
@@ -63,23 +59,19 @@ export const PasswordRecord: FC<Props> = ({ id, name, url, username, password, e
       actions={
         <ActionPanel>
           <ActionPanel.Section title={`Record ${id}`}>
-            <Action.Push
-              title="Edit Record"
-              icon={{ source: Icon.Pencil }}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
-              target={<EditRecordForm id={id} initialValues={{ name, username, password, email, notes, url }} />}
-            />
-            <Action
-              title="Delete Record"
-              icon={{ source: Icon.Trash, tintColor: Color.Red }}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
-              onAction={handleDeleteRecord}
-            />
+            <CopyRecordPassword password={password} />
+            {username && <CopyRecordUsername username={username} />}
+            {email && <CopyRecordEmail email={email} />}
+            {url && <OpenRecordURL url={url} />}
+            <CopyRecordJSON record={{ id, name, url, username, password, email, notes }} />
+            <EditRecordAction id={id} record={{ name, username, password, email, notes, url }} />
+            <DeleteRecordAction id={id} revalidateDocument={revalidateDocument} />
           </ActionPanel.Section>
           <ActionPanel.Section title="RayPass Actions">
             <NewRecordAction />
-            <ChangeDocumentAction />
+            <ManageDocumentsAction />
             <NewDocumentAction />
+            <ShowDocument name={name} />
             <RefreshLocalReferencesActions />
           </ActionPanel.Section>
         </ActionPanel>

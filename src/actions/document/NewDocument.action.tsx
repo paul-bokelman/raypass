@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { Action, Icon } from "@raycast/api";
-import { NewDocumentForm } from "../views";
+import { NewDocumentForm } from "../../views";
 
 export const NewDocumentAction: FC = () => (
   <Action.Push

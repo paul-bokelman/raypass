@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Action, ActionPanel, Form, useNavigation, Icon } from "@raycast/api";
 import { documentStore } from "../context";
 import { docs, validation } from "../utils";
-import Command from "../raypass";
-import { ChangeDocumentAction, NewDocumentAction, RefreshLocalReferencesActions } from "../actions";
+import { ManageDocumentsAction, NewDocumentAction, RefreshLocalReferencesActions } from "../actions";
+import { PasswordRecords } from "./PasswordRecords";
 
 interface Props {
   documentName: string;
@@ -40,8 +40,9 @@ export const EncryptedPasswordForm: FC<Props> = ({ documentName }) => {
     try {
       await docs.get({ documentName, password });
       documentStore.setState({ password: password });
-      push(<Command />);
+      push(<PasswordRecords />);
     } catch (error) {
+      // other errors are not handled...
       return setErrors((prev) => ({ ...prev, password: "Incorrect password" }));
     }
   };
@@ -52,7 +53,7 @@ export const EncryptedPasswordForm: FC<Props> = ({ documentName }) => {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Decrypt Document" onSubmit={handleSubmit} icon={Icon.LockUnlocked} />
-          <ChangeDocumentAction />
+          <ManageDocumentsAction />
           <NewDocumentAction />
           <RefreshLocalReferencesActions />
         </ActionPanel>

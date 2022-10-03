@@ -3,10 +3,10 @@ import type { ValidationErrors } from "../utils";
 import type { NewDocumentData } from "../types";
 import { useState } from "react";
 import os from "node:os";
-import { Form, Action, ActionPanel, useNavigation, Icon } from "@raycast/api";
+import { Form, Action, ActionPanel, useNavigation, Icon, showToast, Toast } from "@raycast/api";
 import { docs, validation } from "../utils";
 import Command from "../raypass";
-import { GeneratePasswordAction } from "../actions";
+import { GeneratePasswordAction, ManageDocumentsAction, RefreshLocalReferencesActions } from "../actions";
 
 export const NewDocumentForm: FC = () => {
   const { push } = useNavigation();
@@ -32,13 +32,19 @@ export const NewDocumentForm: FC = () => {
     const empty = validation.validate.empty<NewDocumentData>(document, ["name", "password"]);
     if (empty) return;
 
-    const nameExists = await docs.collision({ name: document.name });
-    if (nameExists) return setErrors((prev) => ({ ...prev, name: "A document with this name already exists!" }));
-
-    const documentCreated = await docs.new(document);
-    if (!documentCreated) return;
-
-    push(<Command />);
+    try {
+      const nameExists = await docs.collision({ name: document.name });
+      if (nameExists) return setErrors((prev) => ({ ...prev, name: "A document with this name already exists!" }));
+      await docs.new(document);
+      push(<Command />);
+    } catch (error) {
+      await showToast(
+        Toast.Style.Failure,
+        "Failed to create new document",
+        "Reload and refresh cache if the problem persists"
+      );
+      return;
+    }
   };
 
   return (
@@ -46,8 +52,14 @@ export const NewDocumentForm: FC = () => {
       navigationTitle="New Document"
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.ArrowRightCircle} />
-          <GeneratePasswordAction />
+          <ActionPanel.Section title="New Document">
+            <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.ArrowRightCircle} />
+            <GeneratePasswordAction />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="RayPass Actions">
+            <ManageDocumentsAction />
+            <RefreshLocalReferencesActions />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >

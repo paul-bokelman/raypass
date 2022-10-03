@@ -1,14 +1,14 @@
 import type { FC } from "react";
 import { Action, Icon, useNavigation } from "@raycast/api";
-import { docs } from "../utils";
-import { PasswordRecords } from "../views";
+import { docs } from "../../utils";
+import { Documents } from "../../views";
 
 export const RefreshLocalReferencesActions: FC = () => {
   const { push } = useNavigation();
   const refreshLocalReferences = async () => {
     try {
       await docs.index();
-      push(<PasswordRecords />);
+      push(<Documents />);
     } catch (error) {
       console.error(error);
       return;

@@ -6,7 +6,7 @@ export const NoDocument: FC = () => {
   return (
     <List>
       <List.EmptyView
-        icon={{ source: Icon.BlankDocument }}
+        icon={Icon.BlankDocument}
         actions={
           <ActionPanel title="No document actions">
             <ActionPanel.Section>

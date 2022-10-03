@@ -1,5 +1,7 @@
 import type { LocalDocumentReference, LocalDocumentReferences } from "../types";
-import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
+import { docs } from ".";
+import { documentStore } from "../context";
 
 export const referenceKey = "doc_refs";
 
@@ -8,31 +10,25 @@ const createLocalDocumentReference = async (): Promise<void> => {
     await LocalStorage.setItem(referenceKey, JSON.stringify([]));
     return;
   } catch (error) {
-    const msg = "Could not create local document reference";
-    await showToast(Toast.Style.Failure, "Error", msg);
-    throw new Error(msg);
+    throw new Error("Could not create local document reference");
   }
 };
 
-const removeLocalDocumentReference = async ({ name }: { name: string }) => {
-  const { all, selected } = await getLocalDocumentReferences(["name"]);
+const removeLocalDocumentReference = async ({ documentName }: { documentName: string }) => {
+  const { all, selected } = await getLocalDocumentReferences([documentName]);
   if (selected.length === 0) return;
 
   if (selected[0].isActive) {
-    const msg = `Switch active document before deleting (${name})`;
-    await showToast(Toast.Style.Failure, "Error", msg);
-    throw new Error(msg);
+    throw new Error(`Switch active document before deleting (${documentName})`);
   }
 
-  const newRefs = all.filter((ref) => ref.name !== name);
+  const newRefs = all.filter((ref) => ref.name !== documentName);
 
   try {
     await LocalStorage.setItem(referenceKey, JSON.stringify(newRefs));
     return;
   } catch (error) {
-    const msg = `Could not remove local document reference for ${name}`;
-    await showToast(Toast.Style.Failure, "Error", msg);
-    throw new Error(msg);
+    throw new Error(`Could not remove local document reference for ${documentName}`);
   }
 };
 
@@ -59,10 +55,7 @@ const appendLocalDocumentReference = async ({
 
     return ref;
   } catch (error) {
-    console.log(error);
-    const msg = `Failed to edit local document reference (${name})`;
-    await showToast(Toast.Style.Failure, "Error", msg);
-    throw new Error(msg);
+    throw new Error(`Failed to edit local document reference (${name})`);
   }
 };
 
@@ -91,18 +84,25 @@ const editLocalDocumentReference = async ({
     return updatedRefs.filter((ref) => ref.name === name)[0];
   } catch (error) {
     console.log(error);
-    const msg = `Failed to edit local document reference (${name})`;
-    await showToast(Toast.Style.Failure, "Error", msg);
-    throw new Error(msg);
+    throw new Error(`Failed to edit local document reference (${name})`);
+  }
+};
+
+const refreshLocalDocumentReferences = async (): Promise<LocalDocumentReferences> => {
+  try {
+    const { documents } = await docs.index();
+    await LocalStorage.setItem(referenceKey, JSON.stringify(documents));
+    documentStore.setState({ ref: documents.filter((ref) => ref.isActive)[0] });
+    return documents;
+  } catch (error) {
+    throw new Error("Could not refresh local document references");
   }
 };
 
 export const getActiveLocalDocumentReference = async (): Promise<LocalDocumentReference | null> => {
   const { all, refCreated } = await getLocalDocumentReferences();
   if (refCreated) return null;
-  const ref = all.find((ref) => ref.isActive);
-  if (!ref) return null;
-  return ref;
+  return all.find((ref) => ref.isActive) || null;
 };
 
 const getLocalDocumentReferences = async (
@@ -124,6 +124,7 @@ const getLocalDocumentReferences = async (
 export const local = {
   docs: {
     create: createLocalDocumentReference,
+    refresh: refreshLocalDocumentReferences,
     remove: removeLocalDocumentReference,
     append: appendLocalDocumentReference,
     get: getLocalDocumentReferences,

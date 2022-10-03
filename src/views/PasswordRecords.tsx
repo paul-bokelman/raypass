@@ -1,43 +1,20 @@
 import { FC } from "react";
-import { usePromise } from "@raycast/utils";
-import { List, ActionPanel, Color, Icon, useNavigation } from "@raycast/api";
-import { docs } from "../utils";
-import { NoPasswordRecords, EncryptedPasswordForm, SelectExistingDocument } from ".";
+import { List, ActionPanel, Color, Icon } from "@raycast/api";
+import { useRecords } from "../hooks";
+import {
+  NewRecordAction,
+  NewDocumentAction,
+  ManageDocumentsAction,
+  RefreshLocalReferencesActions,
+  ShowDocument,
+} from "../actions";
 import { PasswordRecord } from "../components";
-import { documentStore } from "../context";
-import { NewRecordAction, NewDocumentAction, ChangeDocumentAction, RefreshLocalReferencesActions } from "../actions";
 
 export const PasswordRecords: FC = () => {
-  const { push } = useNavigation();
-  const { ref, password } = documentStore.getState();
+  const { data, isLoading, revalidate } = useRecords();
+  if (!data) return null; // impossible to get here but for ts
 
-  const {
-    isLoading,
-    data: document,
-    revalidate: revalidateDocument,
-  } = usePromise(
-    async (password: string | undefined) => {
-      if (!ref) return push(<SelectExistingDocument />);
-      const document = await docs.get({ documentName: ref.name, password });
-      return document;
-    },
-    [password],
-    {
-      onWillExecute: () => {
-        if (ref && ref.isEncrypted && !password) {
-          return push(<EncryptedPasswordForm documentName={ref.name} />);
-        }
-      },
-      onError: () => {
-        if (ref && ref.isEncrypted && !password) {
-          return push(<EncryptedPasswordForm documentName={ref.name} />);
-        }
-        return push(<SelectExistingDocument />);
-      },
-    }
-  );
-
-  const noPasswordRecords = document && document.records.length === 0;
+  const { document, records } = data;
 
   const mdCodeTags = {
     document: "`Document`",
@@ -54,20 +31,18 @@ export const PasswordRecords: FC = () => {
   
   ${mdCodeTags.code}`;
 
-  if (isLoading) return <List isLoading={true} />;
-
-  if (noPasswordRecords) return <NoPasswordRecords documentName={document.name} />;
   return (
-    <List isShowingDetail navigationTitle={`RayPass - ${ref?.name}`}>
+    <List isShowingDetail isLoading={isLoading} navigationTitle={`RayPass - ${document.name}`}>
       <List.Section title="RayPass Reference">
         <List.Item
           title="RayPass Actions"
-          icon={{ source: Icon.Compass, tintColor: Color.Green }}
+          icon={{ source: Icon.Compass, tintColor: Color.Blue }}
           actions={
             <ActionPanel title="RayPass Actions">
               <NewRecordAction />
               <NewDocumentAction />
-              <ChangeDocumentAction />
+              <ManageDocumentsAction />
+              <ShowDocument name={document.name} />
               <RefreshLocalReferencesActions />
             </ActionPanel>
           }
@@ -78,9 +53,21 @@ export const PasswordRecords: FC = () => {
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="Commands" />
                   <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.Label title="Records" />
+                  <List.Item.Detail.Metadata.Label title="Copy Password" text="⌘C or Enter" />
+                  <List.Item.Detail.Metadata.Label title="Copy Username" text="⌘U" />
+                  <List.Item.Detail.Metadata.Label title="Copy Email" text="⌘E" />
+                  <List.Item.Detail.Metadata.Label title="Copy Record (JSON)" text="⌘J" />
+                  <List.Item.Detail.Metadata.Label title="Open URL" text="⌘⇧W" />
                   <List.Item.Detail.Metadata.Label title="Create New Record" text="⌘N" />
-                  <List.Item.Detail.Metadata.Label title="Switch Active Document" text="⌘O" />
+                  <List.Item.Detail.Metadata.Label title="Edit Record" text="⌘⇧E" />
+                  <List.Item.Detail.Metadata.Label title="Delete Record" text="⌘Backspace" />
+                  <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.Label title="Documents" />
+                  <List.Item.Detail.Metadata.Label title="Manage/Switch Documents" text="⌘O" />
                   <List.Item.Detail.Metadata.Label title="New Document" text="⌘⇧D" />
+                  <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.Label title="General" />
                   <List.Item.Detail.Metadata.Label title="Refresh Local References" text="⌘⇧R" />
                 </List.Item.Detail.Metadata>
               }
@@ -89,9 +76,9 @@ export const PasswordRecords: FC = () => {
         />
       </List.Section>
       {document ? (
-        <List.Section title={`Password Records [${document.records.length}] (${document.name})`}>
-          {document.records.map((record, index) => (
-            <PasswordRecord key={index} {...record} revalidateDocument={revalidateDocument} />
+        <List.Section title={`Records (${records.length})`}>
+          {records.map((record, index) => (
+            <PasswordRecord key={index} {...record} revalidateDocument={revalidate} />
           ))}
         </List.Section>
       ) : null}

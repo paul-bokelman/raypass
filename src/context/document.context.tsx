@@ -1,5 +1,4 @@
 import type { LocalDocumentReference } from "../types";
-import create from "zustand";
 import createStore from "zustand/vanilla";
 
 interface DocumentState {

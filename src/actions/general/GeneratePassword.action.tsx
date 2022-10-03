@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { nanoid } from "nanoid";
 import { Action, Icon, showToast, Toast } from "@raycast/api";
-import { misc } from "../utils";
+import { misc } from "../../utils";
 
 export const GeneratePasswordAction: FC = () => (
   <Action
