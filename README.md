@@ -1,12 +1,26 @@
-# RayPass
+<p align="center">
+   <img src="assets/raypass-icon.png" height="50" />
+   <h1 align="center">RayPass</h1>
+   <sub>Manage passwords through <a href="https://raycast.com/">Raycast</a> that just you and your laptop know.</sub>
+ </p>
 
-<img src="./assets/raypass-icon.png" alt="icon" width="50" height="50" />
-
-Manage passwords through raycast that just your and your laptop know.
 
 ## Features
 
-Raypass is a password manager that uses raycast to manage your passwords. It uses AES-256 encryption to encrypt your password records and stores them in a local file to ensure that only you and your laptop know your passwords.
+- General
+  - Unlimited number of documents and records (your hard drive is the limit)
+  - Designed to not waste your time - Fast workflow and lookup
+
+- [Documents](#documents)
+  - Create, delete, switch between, and search documents
+  - Optionally encrypt (AES-256) document and access with a password
+
+- [Records](#records)
+  - Create, edit, delete, and search records
+  - Copy each individual field to clipboard and Open URL in browser
+  - Favicon from URL is automatically fetched and displayed
+
+## Understanding the components
 
 ### Documents
 
@@ -27,5 +41,3 @@ export interface Record {
   notes?: string;
 }
 ```
-
-<sub>And of course, shortcuts for everything!</sub>

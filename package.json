@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raypass",
   "title": "RayPass - Local Password Manager",
-  "description": "Manage passwords through Raycast that just your and your laptop know.",
+  "description": "Manage passwords through Raycast that just you and your laptop know.",
   "icon": "raypass-icon.png",
   "author": "paul-bokelman",
   "categories": [
@@ -15,7 +15,7 @@
     {
       "name": "raypass",
       "title": "Open RayPass",
-      "description": "Manage passwords through Raycast that just your and your laptop know.",
+      "description": "Manage passwords through Raycast that just you and your laptop know.",
       "mode": "view"
     },
     {
