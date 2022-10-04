@@ -37,6 +37,7 @@ export interface Record {
   username?: string;
   email?: string;
   password: string;
+  secret: string;
   url?: string;
   notes?: string;
 }
