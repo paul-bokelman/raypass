@@ -8,7 +8,6 @@ export const useDocuments = () => {
     async () => {
       const { activeRef, documents } = await docs.index();
       if (!activeRef) {
-        await showToast(Toast.Style.Failure, "No active document", "Please select or create a document");
         const refs = await local.docs.refresh();
         return refs;
       }
@@ -17,7 +16,8 @@ export const useDocuments = () => {
     },
     [],
     {
-      onError: async () => {
+      onError: async (err) => {
+        console.log(err);
         await showToast(Toast.Style.Failure, "Error", "An error occurred while fetching documents.");
         popToRoot(); //? push to view instead?
       },

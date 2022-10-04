@@ -35,7 +35,12 @@ export const Records: FC = () => {
   const showEmptyState = records.length === 0;
 
   return (
-    <List isShowingDetail={!showEmptyState} isLoading={isLoading} navigationTitle={`RayPass - ${document.name}`}>
+    <List
+      isShowingDetail={!showEmptyState}
+      isLoading={isLoading}
+      navigationTitle={`RayPass - ${document.name}`}
+      searchBarPlaceholder="Search Records"
+    >
       {showEmptyState ? (
         <NoRecords documentName={document?.name} revalidateRecords={revalidate} />
       ) : (
@@ -76,6 +81,7 @@ export const Records: FC = () => {
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label title="General" />
                       <List.Item.Detail.Metadata.Label title="Refresh Local References" text="⌘⇧R" />
+                      <List.Item.Detail.Metadata.Label title="Exit RayPass" text="⌘ESC" />
                     </List.Item.Detail.Metadata>
                   }
                 />

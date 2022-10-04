@@ -20,6 +20,6 @@ export const NoDocuments: FC<Props> = ({ revalidateDocuments }) => (
       </ActionPanel>
     }
     title="No Documents"
-    description="No password documents were found, open the action panel to create a new document (⌘⇧D) or refresh the local references (⌘⇧R)."
+    description="No password documents were found, open the action panel to create a new document (⌘⇧D) or refresh the local references (⌘⇧R) if you have existing documents that haven't been detected."
   />
 );

@@ -106,7 +106,11 @@ const indexDocumentDirectory = async (): Promise<{
   const active = await local.docs.active();
 
   if (!fs.existsSync(baseDir)) {
-    throw new Error(`No documents found at ${baseDir}`);
+    try {
+      await fs.promises.mkdir(baseDir);
+    } catch (error) {
+      throw new Error(`Could not create directory at ${baseDir}`);
+    }
   }
 
   try {
