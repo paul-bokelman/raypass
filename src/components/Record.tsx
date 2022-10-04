@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import type { PasswordRecord as PasswordRecordType } from "../types";
+import type { Record as RecordType, RevalidateRecords } from "../types";
 import { ActionPanel, Icon, List, Image } from "@raycast/api";
 import {
   CopyRecordPassword,
@@ -11,22 +11,16 @@ import {
   EditRecordAction,
   DeleteRecordAction,
   ManageDocumentsAction,
-  NewDocumentAction,
   RefreshLocalReferencesActions,
+  ExitRayPassAction,
   ShowDocument,
 } from "../actions";
 
-interface Props extends PasswordRecordType {
-  revalidateDocument: () => Promise<{
-    document: {
-      name: string;
-      location: string;
-    };
-    records: Array<PasswordRecordType>;
-  } | void>;
+interface Props extends RecordType {
+  revalidateRecords: RevalidateRecords;
 }
 
-export const PasswordRecord: FC<Props> = ({ id, name, url, username, password, email, notes, revalidateDocument }) => {
+export const Record: FC<Props> = ({ id, name, url, username, password, email, notes, revalidateRecords }) => {
   const md = `
   ${url ? `## [${name}](${url})` : `## ${name}`}
   ${notes ? notes : ""}
@@ -64,15 +58,19 @@ export const PasswordRecord: FC<Props> = ({ id, name, url, username, password, e
             {email && <CopyRecordEmail email={email} />}
             {url && <OpenRecordURL url={url} />}
             <CopyRecordJSON record={{ id, name, url, username, password, email, notes }} />
-            <EditRecordAction id={id} record={{ name, username, password, email, notes, url }} />
-            <DeleteRecordAction id={id} revalidateDocument={revalidateDocument} />
+            <EditRecordAction
+              id={id}
+              record={{ name, username, password, email, notes, url }}
+              revalidateRecords={revalidateRecords}
+            />
+            <DeleteRecordAction id={id} revalidateRecords={revalidateRecords} />
           </ActionPanel.Section>
           <ActionPanel.Section title="RayPass Actions">
-            <NewRecordAction />
+            <NewRecordAction revalidateRecords={revalidateRecords} />
             <ManageDocumentsAction />
-            <NewDocumentAction />
             <ShowDocument name={name} />
             <RefreshLocalReferencesActions />
+            <ExitRayPassAction />
           </ActionPanel.Section>
         </ActionPanel>
       }

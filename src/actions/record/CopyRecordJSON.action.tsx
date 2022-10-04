@@ -1,9 +1,9 @@
 import type { FC } from "react";
-import type { PasswordRecord } from "../../types";
+import type { Record } from "../../types";
 import { Action } from "@raycast/api";
 
 interface Props {
-  record: PasswordRecord;
+  record: Record;
 }
 
 export const CopyRecordJSON: FC<Props> = ({ record }) => (

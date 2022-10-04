@@ -1,4 +1,4 @@
-export interface PasswordRecord {
+export interface Record {
   id: string;
   name: string;
   username?: string;
@@ -8,4 +8,12 @@ export interface PasswordRecord {
   notes?: string;
 }
 
-export type PasswordRecordData = Omit<PasswordRecord, "id">;
+export type RecordData = Omit<Record, "id">;
+
+export type RevalidateRecords = () => Promise<{
+  document: {
+    name: string;
+    location: string;
+  };
+  records: Record[];
+}>;

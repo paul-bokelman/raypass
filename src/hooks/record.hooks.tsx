@@ -1,8 +1,8 @@
 import { usePromise } from "@raycast/utils";
-import { useNavigation } from "@raycast/api";
+import { popToRoot, showToast, Toast, useNavigation } from "@raycast/api";
 import { docs } from "../utils";
 import { documentStore } from "../context";
-import { Documents, NoPasswordRecords, EncryptedPasswordForm } from "../views";
+import { Documents, EncryptedPasswordForm } from "../views";
 
 export const useRecords = () => {
   const { push } = useNavigation();
@@ -18,20 +18,12 @@ export const useRecords = () => {
     {
       onWillExecute: () => {
         if (!ref) return push(<Documents />);
-        if (encryptedWithNoPassword) {
-          return push(<EncryptedPasswordForm documentName={ref.name} />);
-        }
+        if (encryptedWithNoPassword) return push(<EncryptedPasswordForm documentName={ref.name} />);
       },
-      onData: ({ document, records }) => {
-        if (records.length === 0) {
-          return push(<NoPasswordRecords documentName={document.name} />);
-        }
-      },
-      onError: () => {
-        if (encryptedWithNoPassword) {
-          return push(<EncryptedPasswordForm documentName={ref.name} />);
-        }
-        return push(<Documents />);
+      onError: async () => {
+        if (encryptedWithNoPassword) return push(<EncryptedPasswordForm documentName={ref.name} />);
+        await showToast(Toast.Style.Failure, "Something went wrong", "Refresh cache and try again");
+        return popToRoot();
       },
     }
   );

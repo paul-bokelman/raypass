@@ -1,4 +1,4 @@
-import type { LocalDocumentReferences, NewDocumentData, PasswordRecord } from "../types";
+import type { LocalDocumentReferences, NewDocumentData, Record } from "../types";
 import fs from "node:fs";
 import os from "node:os";
 import { local, c, misc } from ".";
@@ -8,18 +8,18 @@ const root = os.homedir();
 const baseDir = `${root}/.raypass`;
 
 const documentDir = ({ name, encrypted }: { name: string; encrypted: boolean }) => {
-  const location = `${baseDir}/${name}.${encrypted ? "enc" : "json"}`;
+  const fileName = encrypted ? `${name}.enc` : `${name}.json`;
+  const location = `${baseDir}/${fileName}`;
   return {
     root,
     baseDir,
     docLocation: location,
+    fileName,
   };
 };
 
-//! delete document
-
-const createDocument = async ({ name, password }: NewDocumentData): Promise<boolean> => {
-  const { baseDir, docLocation } = documentDir({ name, encrypted: password ? true : false });
+const createDocument = async ({ name, password }: NewDocumentData): Promise<void> => {
+  const { baseDir, docLocation, fileName } = documentDir({ name, encrypted: password ? true : false });
 
   if (!fs.existsSync(baseDir)) {
     try {
@@ -29,92 +29,74 @@ const createDocument = async ({ name, password }: NewDocumentData): Promise<bool
     }
   }
 
-  if (fs.existsSync(docLocation)) {
-    throw new Error(`Document already exists at ${docLocation}`);
-  }
+  if (fs.existsSync(docLocation)) throw new Error(`Document already exists at ${docLocation}`);
 
   try {
     const payload = JSON.stringify([]);
     const data = password ? c.encrypt({ text: payload, password }) : payload;
-
     await fs.promises.writeFile(docLocation, data, "utf-8");
-    await local.docs.append({ name, location: docLocation, isEncrypted: password ? true : false });
+    await local.docs.append({ name: fileName, location: docLocation, isEncrypted: password ? true : false });
+    return;
   } catch (error) {
-    console.log(error);
     throw new Error(`Could not create document at ${docLocation}`);
   }
-
-  return true;
 };
 
-const deleteDocument = async ({ documentName }: { documentName: string }): Promise<boolean> => {
+const deleteDocument = async ({ documentName }: { documentName: string }): Promise<void> => {
   const { selected } = await local.docs.get([documentName]);
-
-  if (selected.length === 0) return false;
-
-  const { docLocation } = documentDir({ name: documentName, encrypted: selected[0].isEncrypted });
-
-  if (!fs.existsSync(docLocation)) return false;
-
+  if (selected.length === 0) throw new Error(`Document does not exist (${documentName})`);
+  const path = misc.getDocLocation(documentName);
+  if (!fs.existsSync(path)) throw new Error(`Document does not exist (${path})`);
   try {
     await local.docs.remove({ documentName });
-    await fs.promises.unlink(docLocation);
-    return true;
+    await fs.promises.unlink(path);
+    return;
   } catch (error) {
-    return false;
+    throw new Error(`Could not delete document at ${path}`);
   }
 };
 
 const setActiveDocument = async ({ documentName }: { documentName: string }): Promise<void> => {
+  // document should always be active?
   try {
     const { all: refs } = await local.docs.get();
+    const needsNewRef = refs.filter((ref) => ref.name === documentName).length === 0;
 
-    const needsNewRef = refs.length === 0 || refs.filter((ref) => ref.name === documentName).length === 0;
-
-    const ref = !needsNewRef
-      ? await local.docs.edit({ name: documentName, data: { isActive: true } })
-      : await local.docs.append({
-          name: documentName,
-          location: `${baseDir}/${documentName}`,
-          isEncrypted: misc.isEncrypted(documentName),
-        });
-
+    if (needsNewRef) throw new Error(`Document does not exist (${documentName})`); // throw err instead of creating new
+    const ref = await local.docs.edit({ name: documentName, data: { isActive: true } });
     documentStore.setState({ ref, password: undefined });
   } catch (error) {
+    console.log(error);
     throw new Error(`Could not set ${documentName} as active document`);
   }
 };
 
 const getDocument = async ({ documentName, password }: { documentName: string; password?: string }) => {
   const { all, selected } = await local.docs.get([documentName]);
-
-  if (all.length === 0 || selected.length === 0) {
-    throw new Error("No local document found");
-  }
-
+  if (all.length === 0 || selected.length === 0) throw new Error("No local document found");
   const { name, location, isEncrypted } = selected[0];
-
-  if (isEncrypted && !password) {
-    throw new Error("Document is encrypted, and no password was provided");
-  }
-
+  if (isEncrypted && !password) throw new Error("Document is encrypted, and no password was provided");
   try {
     const data = await fs.promises.readFile(location, "utf-8");
-
-    const records =
-      isEncrypted && password ? c.decrypt({ text: data, password }) : (JSON.parse(data) as Array<PasswordRecord>);
-
+    const records = isEncrypted && password ? c.decrypt({ text: data, password }) : (JSON.parse(data) as Array<Record>);
     return { name, location, records };
   } catch (error) {
     throw new Error(`Could not read document at ${location}`);
   }
 };
 
-const documentNameCollision = async ({ name }: { name: string }): Promise<boolean> => {
+const documentNameCollision = async ({
+  name,
+  isEncrypted,
+}: {
+  name: string;
+  isEncrypted: boolean;
+}): Promise<boolean> => {
+  const docName = isEncrypted ? `${name}.enc` : `${name}.json`;
   const indexedDocs = await indexDocumentDirectory();
   if (!indexedDocs) return false;
   const { documents } = indexedDocs;
-  return documents.filter((doc) => doc.name === name).length > 0;
+  return documents.filter((doc) => doc.name === docName).length > 0;
 };
 
 const indexDocumentDirectory = async (): Promise<{
@@ -145,7 +127,7 @@ const getActiveDocument = async ({
   password,
 }: {
   password?: string;
-}): Promise<{ exists: boolean; name: string; records: Array<PasswordRecord>; isEncrypted: boolean }> => {
+}): Promise<{ exists: boolean; name: string; records: Array<Record>; isEncrypted: boolean }> => {
   const ref = await local.docs.active();
   if (!ref) return { exists: false, name: "", records: [], isEncrypted: false };
 

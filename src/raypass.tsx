@@ -1,11 +1,21 @@
-import { List } from "@raycast/api";
-import { PasswordRecords, NoDocument } from "./views";
+import { List, showToast, Toast, popToRoot } from "@raycast/api";
+import { Documents, Records } from "./views";
 import { useActiveRef } from "./hooks";
+import { useEffect } from "react";
 
 export default function Command() {
-  const { isLoading, data: ref, error } = useActiveRef({ set: true });
+  const { isLoading, data: ref, error } = useActiveRef();
+
+  const handleError = async () => {
+    await showToast(Toast.Style.Failure, "Failed to get active ref");
+    popToRoot();
+  };
+
+  useEffect(() => {
+    if (error) handleError();
+  }, [error]);
 
   if (isLoading) return <List isLoading={true} />;
-  if (error || !ref) return <NoDocument />;
-  return <PasswordRecords />;
+  if (!ref) return <Documents />;
+  return <Records />;
 }

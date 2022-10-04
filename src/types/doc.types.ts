@@ -12,3 +12,5 @@ export interface LocalDocumentReference {
 }
 
 export type LocalDocumentReferences = Array<LocalDocumentReference>;
+
+export type RevalidateDocuments = () => Promise<LocalDocumentReferences>;

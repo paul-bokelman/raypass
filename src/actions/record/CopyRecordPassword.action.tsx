@@ -6,5 +6,5 @@ interface Props {
 }
 
 export const CopyRecordPassword: FC<Props> = ({ password }) => (
-  <Action.CopyToClipboard title="Copy Password" content={password} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+  <Action.CopyToClipboard title="Copy Password" content={password} shortcut={{ modifiers: ["cmd"], key: "p" }} />
 );

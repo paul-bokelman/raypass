@@ -1,11 +1,11 @@
 import type { FC } from "react";
 import type { ValidationErrors } from "../utils";
 import { useState } from "react";
-import { Action, ActionPanel, Form, useNavigation, Icon } from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation, Icon, showToast, Toast } from "@raycast/api";
 import { documentStore } from "../context";
 import { docs, validation } from "../utils";
-import { ManageDocumentsAction, NewDocumentAction, RefreshLocalReferencesActions } from "../actions";
-import { PasswordRecords } from "./PasswordRecords";
+import { ManageDocumentsAction, RefreshLocalReferencesActions, ExitRayPassAction } from "../actions";
+import { Records } from "./Records";
 
 interface Props {
   documentName: string;
@@ -40,7 +40,8 @@ export const EncryptedPasswordForm: FC<Props> = ({ documentName }) => {
     try {
       await docs.get({ documentName, password });
       documentStore.setState({ password: password });
-      push(<PasswordRecords />);
+      await showToast(Toast.Style.Success, "Correct password", "You can now access your records");
+      push(<Records />);
     } catch (error) {
       // other errors are not handled...
       return setErrors((prev) => ({ ...prev, password: "Incorrect password" }));
@@ -54,8 +55,8 @@ export const EncryptedPasswordForm: FC<Props> = ({ documentName }) => {
         <ActionPanel>
           <Action.SubmitForm title="Decrypt Document" onSubmit={handleSubmit} icon={Icon.LockUnlocked} />
           <ManageDocumentsAction />
-          <NewDocumentAction />
           <RefreshLocalReferencesActions />
+          <ExitRayPassAction />
         </ActionPanel>
       }
     >
@@ -63,7 +64,6 @@ export const EncryptedPasswordForm: FC<Props> = ({ documentName }) => {
         title="Encrypted Document"
         text={`The document "${documentName}" is encrypted, enter the corresponding password to access it.`}
       />
-      <Form.Separator />
       <Form.PasswordField
         id="password"
         title="Password"

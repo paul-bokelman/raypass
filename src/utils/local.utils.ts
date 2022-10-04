@@ -14,7 +14,7 @@ const createLocalDocumentReference = async (): Promise<void> => {
   }
 };
 
-const removeLocalDocumentReference = async ({ documentName }: { documentName: string }) => {
+const removeLocalDocumentReference = async ({ documentName }: { documentName: string }): Promise<void> => {
   const { all, selected } = await getLocalDocumentReferences([documentName]);
   if (selected.length === 0) return;
 
@@ -39,9 +39,7 @@ const appendLocalDocumentReference = async ({
 }: Omit<LocalDocumentReference, "isActive">): Promise<LocalDocumentReference> => {
   try {
     const { all } = await getLocalDocumentReferences([name]);
-
     const ref = { name, location, isEncrypted, isActive: true };
-
     const refs =
       all.length !== 0
         ? all
@@ -55,6 +53,7 @@ const appendLocalDocumentReference = async ({
 
     return ref;
   } catch (error) {
+    console.log(error);
     throw new Error(`Failed to edit local document reference (${name})`);
   }
 };

@@ -1,4 +1,4 @@
-import type { PasswordRecord } from "../types";
+import type { Record } from "../types";
 import crypto from "node:crypto";
 import fs from "node:fs";
 
@@ -23,7 +23,7 @@ const decrypt = ({ text, password }: { text: string; password: string }) => {
   const data = Buffer.concat([decipher.update(Buffer.from(encrypted, "hex")), decipher.final()]);
 
   try {
-    return JSON.parse(data.toString()) as Array<PasswordRecord>;
+    return JSON.parse(data.toString()) as Array<Record>;
   } catch (e) {
     throw new Error("Invalid password");
   }

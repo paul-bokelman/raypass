@@ -1,15 +1,23 @@
 import type { FC } from "react";
 import type { ValidationErrors } from "../utils";
-import type { NewDocumentData } from "../types";
+import type { NewDocumentData, RevalidateDocuments } from "../types";
 import { useState } from "react";
 import os from "node:os";
 import { Form, Action, ActionPanel, useNavigation, Icon, showToast, Toast } from "@raycast/api";
 import { docs, validation } from "../utils";
-import Command from "../raypass";
-import { GeneratePasswordAction, ManageDocumentsAction, RefreshLocalReferencesActions } from "../actions";
+import {
+  GeneratePasswordAction,
+  ManageDocumentsAction,
+  RefreshLocalReferencesActions,
+  ExitRayPassAction,
+} from "../actions";
 
-export const NewDocumentForm: FC = () => {
-  const { push } = useNavigation();
+interface Props {
+  revalidateDocuments: RevalidateDocuments;
+}
+
+export const NewDocumentForm: FC<Props> = ({ revalidateDocuments }) => {
+  const { pop } = useNavigation();
   const [errors, setErrors] = useState<ValidationErrors<NewDocumentData>>({
     name: undefined,
     encrypted: undefined,
@@ -33,10 +41,15 @@ export const NewDocumentForm: FC = () => {
     if (empty) return;
 
     try {
-      const nameExists = await docs.collision({ name: document.name });
+      const nameExists = await docs.collision({
+        name: document.name,
+        isEncrypted: encrypting,
+      });
       if (nameExists) return setErrors((prev) => ({ ...prev, name: "A document with this name already exists!" }));
       await docs.new(document);
-      push(<Command />);
+      await showToast(Toast.Style.Success, "Document created");
+      await revalidateDocuments();
+      pop();
     } catch (error) {
       await showToast(
         Toast.Style.Failure,
@@ -59,15 +72,15 @@ export const NewDocumentForm: FC = () => {
           <ActionPanel.Section title="RayPass Actions">
             <ManageDocumentsAction />
             <RefreshLocalReferencesActions />
+            <ExitRayPassAction />
           </ActionPanel.Section>
         </ActionPanel>
       }
     >
       <Form.Description
         title="New Document"
-        text={`Create a new document to locally store your passwords. Files are stored in ${os.homedir()}/.raypass. You can encrypt your document with a password (will be required when accessing doc). If you choose not to encrypt your document, it will be accessible by anyone with access to your computer.`}
+        text={`Create a new document to locally store your passwords. Files are stored in ${os.homedir()}/.raypass. You can encrypt your document with a password (will be required when accessing doc). If you choose not to encrypt your document, it will be stored in plain text.`}
       />
-      <Form.Separator />
       <Form.TextField
         id="name"
         title="Document Name"

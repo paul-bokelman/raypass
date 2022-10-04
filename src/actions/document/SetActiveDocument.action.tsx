@@ -1,23 +1,21 @@
 import type { FC } from "react";
 import { Action, Icon, useNavigation, showToast, Toast } from "@raycast/api";
 import { docs } from "../../utils";
-import Command from "../../raypass";
+import { Records } from "../../views";
 
 interface Props {
-  documentName: string;
-  isActive: boolean;
+  doc: { name: string; isActive: boolean };
 }
 
-export const SetActiveDocument: FC<Props> = ({ documentName, isActive }) => {
+export const SetActiveDocument: FC<Props> = ({ doc }) => {
   const { push } = useNavigation();
   // reval
 
   const handleSetActiveDocument = async () => {
-    if (isActive) return push(<Command />);
-
+    // pop for active?
     try {
-      await docs.set({ documentName });
-      return push(<Command />);
+      await docs.set({ documentName: doc.name });
+      return push(<Records />);
     } catch (err) {
       await showToast(Toast.Style.Failure, "Failed to set active document", `${err}`);
       return;

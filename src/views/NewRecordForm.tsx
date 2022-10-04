@@ -1,17 +1,20 @@
 import type { FC } from "react";
-import type { PasswordRecordData } from "../types";
+import type { RecordData, RevalidateRecords } from "../types";
 import type { ValidationErrors } from "../utils";
 import { useState } from "react";
 import { Form, Action, ActionPanel, useNavigation, Icon, showToast, Toast } from "@raycast/api";
 import { documentStore } from "../context";
 import { records, validation } from "../utils";
-import Command from "../raypass";
 import { GeneratePasswordAction } from "../actions";
 
-export const NewRecordForm: FC = () => {
-  const { push } = useNavigation();
+interface Props {
+  revalidateRecords: RevalidateRecords;
+}
+
+export const NewRecordForm: FC<Props> = ({ revalidateRecords }) => {
+  const { pop } = useNavigation();
   const { ref, password } = documentStore.getState();
-  const [errors, setErrors] = useState<ValidationErrors<PasswordRecordData>>({
+  const [errors, setErrors] = useState<ValidationErrors<RecordData>>({
     name: undefined,
     email: undefined,
     password: undefined,
@@ -31,13 +34,15 @@ export const NewRecordForm: FC = () => {
     return setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
-  const handleSubmit = async (record: PasswordRecordData) => {
-    const empty = validation.validate.empty<PasswordRecordData>(record, ["name", "password"]);
+  const handleSubmit = async (record: RecordData) => {
+    const empty = validation.validate.empty<RecordData>(record, ["name", "password"]);
     if (empty) return;
 
     try {
       await records.create({ record, password: ref?.isEncrypted ? password : undefined });
-      push(<Command />);
+      await revalidateRecords();
+      await showToast(Toast.Style.Success, "Record created successfully");
+      pop();
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to edit record", "Reload and refresh cache if the problem persists");
       return;
@@ -58,7 +63,6 @@ export const NewRecordForm: FC = () => {
         title="New password record"
         text="Create a new password record for a website, service, or application. You can also add a username, email, URL (for favicon & link), and notes."
       />
-      <Form.Separator />
       <Form.TextField
         id="name"
         title="Service Name"

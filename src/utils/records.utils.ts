@@ -1,4 +1,4 @@
-import type { PasswordRecord, LocalDocumentReference } from "../types";
+import type { Record, LocalDocumentReference } from "../types";
 import fs from "node:fs";
 import { nanoid } from "nanoid";
 import { docs, local, c } from ".";
@@ -7,7 +7,7 @@ const getRecords = async ({
   password,
 }: {
   password?: string;
-}): Promise<{ ref: LocalDocumentReference | null; records: PasswordRecord[] | null }> => {
+}): Promise<{ ref: LocalDocumentReference | null; records: Record[] | null }> => {
   const ref = await local.docs.active();
   if (!ref) {
     return { ref: null, records: null };
@@ -27,7 +27,7 @@ const editRecord = async ({
   password,
 }: {
   id: string;
-  record: Omit<PasswordRecord, "id">;
+  record: Omit<Record, "id">;
   password?: string;
 }): Promise<{ success: boolean }> => {
   const { ref, records: currentRecords } = await getRecords({ password });
@@ -74,13 +74,7 @@ const deleteRecord = async ({ id, password }: { id: string; password?: string })
   }
 };
 
-const createRecord = async ({
-  record,
-  password,
-}: {
-  record: Omit<PasswordRecord, "id">;
-  password?: string;
-}): Promise<void> => {
+const createRecord = async ({ record, password }: { record: Omit<Record, "id">; password?: string }): Promise<void> => {
   const activeRef = await local.docs.active();
   if (!activeRef) {
     throw new Error("No active document");

@@ -1,21 +1,15 @@
 import type { FC } from "react";
-import type { PasswordRecord } from "../../types";
+import type { Record, RevalidateRecords } from "../../types";
 import { Action, confirmAlert, Alert, showToast, Toast, Icon, Color } from "@raycast/api";
 import { records } from "../../utils";
 import { documentStore } from "../../context";
 
 interface Props {
   id: string;
-  revalidateDocument: () => Promise<{
-    document: {
-      name: string;
-      location: string;
-    };
-    records: Array<PasswordRecord>;
-  } | void>;
+  revalidateRecords: RevalidateRecords;
 }
 
-export const DeleteRecordAction: FC<Props> = ({ id, revalidateDocument }) => {
+export const DeleteRecordAction: FC<Props> = ({ id, revalidateRecords }) => {
   const { ref, password } = documentStore.getState();
 
   const handleDeleteRecord = async () => {
@@ -30,7 +24,7 @@ export const DeleteRecordAction: FC<Props> = ({ id, revalidateDocument }) => {
         })
       ) {
         await records.delete({ id, password: ref?.isEncrypted ? password : undefined });
-        await revalidateDocument();
+        await revalidateRecords();
         await showToast(Toast.Style.Success, "Record deleted successfully");
         return;
       }
@@ -44,7 +38,7 @@ export const DeleteRecordAction: FC<Props> = ({ id, revalidateDocument }) => {
     <Action
       title="Delete Record"
       icon={{ source: Icon.Trash, tintColor: Color.Red }}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+      shortcut={{ modifiers: ["cmd"], key: "backspace" }}
       onAction={handleDeleteRecord}
     />
   );

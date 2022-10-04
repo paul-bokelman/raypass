@@ -1,5 +1,6 @@
 export * from "./general/RefreshLocalReferences.action";
 export * from "./general/GeneratePassword.action";
+export * from "./general/ExitRayPass.action";
 
 export * from "./document/ManageDocuments.action";
 export * from "./document/NewDocument.action";
