@@ -20,7 +20,6 @@ export const newRecord = object().shape({
         }
       },
     }),
-  // secret: string().optional(),
   url: string().url("Invalid URL!").optional(),
   notes: string().optional(),
 });
