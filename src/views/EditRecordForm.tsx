@@ -74,7 +74,7 @@ export const EditRecordForm: FC<Props> = ({ id, initialValues, revalidateRecords
       <Form.TextField
         id="username"
         title="Username"
-        placeholder="PaulB"
+        placeholder="Rad Username..."
         defaultValue={initialValues?.username}
         error={errors.username}
         onChange={(newValue) => handleValidation("username", newValue)}

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raypass",
-  "title": "RayPass",
+  "title": "RayPass - Local Password Manager",
   "description": "Manage passwords through Raycast that just your and your laptop know.",
   "icon": "raypass-icon.png",
   "author": "paul-bokelman",
@@ -14,10 +14,16 @@
   "commands": [
     {
       "name": "raypass",
-      "title": "RayPass",
-      "subtitle": "Open RayPass",
+      "title": "Open RayPass",
       "description": "Manage passwords through Raycast that just your and your laptop know.",
       "mode": "view"
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "subtitle": "Generate a strong password using nanoid",
+      "description": "Generate a secure password using nanoid",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

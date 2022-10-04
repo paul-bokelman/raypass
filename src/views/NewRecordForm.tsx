@@ -74,7 +74,7 @@ export const NewRecordForm: FC<Props> = ({ revalidateRecords }) => {
       <Form.TextField
         id="username"
         title="Username"
-        placeholder="PaulB"
+        placeholder="JohnDoe125"
         error={errors.username}
         onChange={(newValue) => handleValidation("username", newValue)}
         onBlur={(e) => handleValidation(e.target.id, e.target.value)}

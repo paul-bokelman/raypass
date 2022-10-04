@@ -3,7 +3,7 @@ import { Documents, Records } from "./views";
 import { useActiveRef } from "./hooks";
 import { useEffect } from "react";
 
-export default function Command() {
+const Command = () => {
   const { isLoading, data: ref, error } = useActiveRef();
 
   const handleError = async () => {
@@ -18,4 +18,6 @@ export default function Command() {
   if (isLoading) return <List isLoading={true} />;
   if (!ref) return <Documents />;
   return <Records />;
-}
+};
+
+export default Command;
