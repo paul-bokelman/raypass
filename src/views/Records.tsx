@@ -16,7 +16,7 @@ export const Records: FC = () => {
   const mdCodeTags = {
     document: "`Document`",
     Record: "`Password Record`",
-    code: "```ts\ninterface Record {\n  name: string;\n  username?: string;\n  email?: string;\n  password: string;\n  secret: string;\n  url?: string;\n  notes?: string;\n}\n```",
+    code: "```ts\ninterface Record {\n  name: string;\n  username?: string;\n  email?: string;\n  password: string;\n  secret?: string;\n  url?: string;\n  notes?: string;\n}\n```",
   };
 
   const md = `
