@@ -6,7 +6,7 @@ import { misc } from "../../utils";
 export const GeneratePasswordAction: FC = () => (
   <Action
     icon={Icon.Clipboard}
-    shortcut={{ modifiers: ["cmd"], key: "p" }}
+    shortcut={{ modifiers: ["cmd"], key: "g" }}
     title="Generate Password"
     onAction={async () => {
       const password = nanoid();

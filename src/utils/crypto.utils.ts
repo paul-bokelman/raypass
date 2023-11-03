@@ -1,11 +1,13 @@
 import type { Record } from "../types";
 import crypto from "node:crypto";
-import fs from "node:fs";
 
 const algorithm = "aes-256-ctr";
+const key = crypto.createHash("sha256").digest("hex");
 
 const hash = ({ password }: { password: string }) => {
-  return crypto.createHash("sha256").update(password).digest("base64").substr(0, 32);
+  const hmac = crypto.createHmac("sha256", key);
+  hmac.update(password);
+  return hmac.digest("base64").substr(0, 32);
 };
 
 const encrypt = ({ text, password }: { text: string; password: string }) => {
@@ -29,18 +31,4 @@ const decrypt = ({ text, password }: { text: string; password: string }) => {
   }
 };
 
-// const fileIsEncrypted = ({ location }: { location: string }) => {
-//   const data = fs.readFileSync(location, "utf-8");
-//   try {
-//     JSON.parse(data);
-//     return false;
-//   } catch (e) {
-//     return true;
-//   }
-// };
-
-export const c = {
-  encrypt,
-  decrypt,
-  // fileIsEncrypted,
-};
+export const c = { encrypt, decrypt };
