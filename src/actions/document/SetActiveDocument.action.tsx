@@ -8,10 +8,8 @@ interface Props {
 
 export const SetActiveDocument: React.FC<Props> = ({ doc }) => {
   const { push } = useNavigation();
-  // reval
 
   const handleSetActiveDocument = async () => {
-    // pop for active?
     try {
       await docs.set({ documentName: doc.name });
       return push(<Records />);
@@ -21,12 +19,5 @@ export const SetActiveDocument: React.FC<Props> = ({ doc }) => {
     }
   };
 
-  return (
-    <Action
-      icon={Icon.Switch}
-      // shortcut={{ modifiers: ["cmd"], key: "enter" }}
-      title="Select Document"
-      onAction={handleSetActiveDocument}
-    />
-  );
+  return <Action icon={Icon.Switch} title="Select Document" onAction={handleSetActiveDocument} />;
 };

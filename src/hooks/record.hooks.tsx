@@ -11,7 +11,7 @@ export const useRecords = () => {
 
   return usePromise(
     async (password: string | undefined) => {
-      const { name, location, records } = await docs.get({ documentName: ref?.name || "_", password }); // hacky but ref is always defined but typescript doesn't know
+      const { name, location, records } = await docs.get({ documentName: ref?.name as string, password });
       return { document: { name, location }, records };
     },
     [password],
